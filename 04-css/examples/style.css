@@ -1,0 +1,13 @@
+/* --- CSS 기본 스타일 시트 ---
+   HTML 문서의 <link rel="stylesheet"> 태그를 통해 외부 파일로 연결된다.
+   선택자(selector) { 속성(property): 값(value); } 형식으로 스타일을 정의한다. */
+
+body {
+    font-family: sans-serif;   /* 기본 글꼴을 고딕(sans-serif) 계열로 지정 */
+    margin: 2rem;              /* 페이지 바깥 여백 (1rem = 브라우저 기본 글꼴 크기, 보통 16px) */
+    line-height: 1.6;          /* 줄 간격: 글꼴 크기의 1.6배 */
+}
+
+h1 {
+    color: #333;               /* 글자 색상: 진한 회색 (#000000 = 검정, #ffffff = 흰색) */
+}

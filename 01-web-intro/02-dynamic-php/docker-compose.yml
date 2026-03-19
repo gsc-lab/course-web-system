@@ -1,0 +1,21 @@
+# -------------------------------------------------------
+# 02-dynamic-php: Nginx + PHP-FPM 구성으로 동적 페이지 생성
+# 구성: Nginx(리버스 프록시) + PHP-FPM(애플리케이션 서버)
+# 흐름: 브라우저 → Nginx(:80) → .php 요청 → PHP-FPM(:9000) → 동적 HTML 반환
+# -------------------------------------------------------
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html:ro                                  # PHP 소스 코드 (읽기 전용)
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro          # Nginx 설정 파일 주입
+    depends_on:
+      - php                                   # PHP 컨테이너가 먼저 준비되어야 함
+
+  # PHP-FPM: FastCGI Process Manager — Nginx로부터 PHP 처리를 위임받는다
+  php:
+    image: php:8.3-fpm                        # PHP 8.3 + FPM (FastCGI) 이미지
+    volumes:
+      - ./src:/var/www/html                   # PHP가 실행할 소스 코드 (쓰기 가능)

@@ -1,0 +1,14 @@
+# -------------------------------------------------------
+# 02-nginx: Nginx 웹서버 설정 실습
+# 구성: Nginx 단독 컨테이너 (설정 파일 학습 목적)
+# conf/ 디렉토리의 설정을 수정하며 Nginx 동작을 실험한다
+# -------------------------------------------------------
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"                       # HTTP
+      - "8443:443"                      # HTTPS (SSL 실습용)
+    volumes:
+      - ./conf:/etc/nginx/conf.d:ro     # Nginx 설정 디렉토리 전체 마운트
+      - ./html:/usr/share/nginx/html:ro # 정적 파일 루트

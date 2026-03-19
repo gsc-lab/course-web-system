@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajax Web</title>
+</head>
+<body>
+    <h1>사용자 목록 (Ajax)</h1>
+    <button id="loadBtn">데이터 불러오기</button>
+    <table border="1" id="userTable" style="display:none;">
+        <thead><tr><th>ID</th><th>이름</th><th>이메일</th><th>등록일</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // --- Ajax (Asynchronous JavaScript and XML) ---
+        // 페이지 전체를 새로고침하지 않고, 서버에 비동기 요청을 보내 데이터만 받아온다.
+        // XMLHttpRequest는 브라우저 내장 Ajax 객체이다 (fetch API의 전신).
+        document.getElementById('loadBtn').addEventListener('click', function () {
+            var xhr = new XMLHttpRequest();     // 1. Ajax 객체 생성
+            xhr.open('GET', '/api.php');         // 2. 요청 방식(GET)과 URL 설정
+            xhr.onload = function () {           // 3. 응답 완료 시 실행할 콜백 등록
+                if (xhr.status === 200) {
+                    var users = JSON.parse(xhr.responseText);  // JSON 문자열 → JS 객체 변환
+                    var tbody = document.querySelector('#userTable tbody');
+                    tbody.innerHTML = '';
+                    // DOM 조작으로 테이블 행을 동적 생성
+                    users.forEach(function (user) {
+                        var tr = document.createElement('tr');
+                        tr.innerHTML =
+                            '<td>' + user.id + '</td>' +
+                            '<td>' + user.name + '</td>' +
+                            '<td>' + user.email + '</td>' +
+                            '<td>' + user.created_at + '</td>';
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('userTable').style.display = 'table';
+                }
+            };
+            xhr.send();                          // 4. 실제 요청 전송
+        });
+    </script>
+</body>
+</html>

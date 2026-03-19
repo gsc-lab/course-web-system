@@ -1,0 +1,35 @@
+# -------------------------------------------------------
+# 03-dynamic-php-mysql: Nginx + PHP-FPM + MySQL 3-tier 구성
+# 구성: Web 서버(Nginx) + App 서버(PHP-FPM) + DB 서버(MySQL)
+# 흐름: 브라우저 → Nginx → PHP-FPM → MySQL → 동적 HTML 반환
+# -------------------------------------------------------
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+
+  php:
+    image: php:8.3-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile            # 커스텀 이미지: pdo_mysql 확장 설치 포함
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - db                              # DB가 준비된 후 PHP 컨테이너 시작
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root          # root 계정 비밀번호 (학습용)
+      MYSQL_DATABASE: example            # 컨테이너 시작 시 자동 생성할 DB 이름
+    ports:
+      - "3306:3306"                      # 호스트에서 DB 직접 접속 가능 (디버깅용)
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro  # 초기 SQL 스크립트 자동 실행

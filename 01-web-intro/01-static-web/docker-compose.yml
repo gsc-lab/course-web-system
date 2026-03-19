@@ -1,0 +1,12 @@
+# -------------------------------------------------------
+# 01-static-web: Nginx가 정적 HTML 파일을 서빙하는 가장 기본적인 구성
+# 구성: Nginx 1개 컨테이너
+# 흐름: 브라우저 → Nginx(:80) → HTML 파일 반환
+# -------------------------------------------------------
+services:
+  web:
+    image: nginx:alpine                       # 경량 Nginx 이미지 (Alpine Linux 기반)
+    ports:
+      - "8080:80"                             # 호스트 8080 → 컨테이너 80 포트 매핑
+    volumes:
+      - ./src:/usr/share/nginx/html:ro        # 로컬 src/ → Nginx 웹 루트 (읽기 전용)
