@@ -5,7 +5,7 @@
 
 header('Content-Type: application/json; charset=utf-8');  // 응답 형식을 JSON으로 지정
 
-$pdo = new PDO('mysql:host=db;dbname=example', 'root', 'root');
+$pdo = new PDO('mysql:host=db;dbname=example;charset=utf8mb4', 'root', 'root');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $stmt = $pdo->query('SELECT * FROM users');

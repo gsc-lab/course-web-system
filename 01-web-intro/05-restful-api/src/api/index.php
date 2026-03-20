@@ -12,7 +12,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-$pdo = new PDO('mysql:host=db;dbname=example', 'root', 'root');
+$pdo = new PDO('mysql:host=db;dbname=example;charset=utf8mb4', 'root', 'root');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // URI에서 HTTP 메서드와 경로 세그먼트를 추출하여 라우팅

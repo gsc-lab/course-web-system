@@ -4,41 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajax Web</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        table { border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 8px; }
+        button { padding: 6px 12px; margin-right: 5px; cursor: pointer; }
+
+        /* Ajax 핵심 시각화: 업데이트되는 영역만 강조 */
+        .static-area { background: #f0f0f0; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .dynamic-area { padding: 15px; border: 2px dashed #2196F3; border-radius: 5px; }
+        .flash { animation: highlight 1s ease; }
+        @keyframes highlight {
+            0% { background-color: #FFEB3B; }
+            100% { background-color: transparent; }
+        }
+        #status { margin-top: 10px; color: #666; }
+        #clickCount { font-weight: bold; color: #2196F3; }
+    </style>
 </head>
 <body>
-    <h1>사용자 목록 (Ajax)</h1>
-    <button id="loadBtn">데이터 불러오기</button>
-    <table border="1" id="userTable" style="display:none;">
-        <thead><tr><th>ID</th><th>이름</th><th>이메일</th><th>등록일</th></tr></thead>
-        <tbody></tbody>
-    </table>
+    <h1>Ajax 동작 원리</h1>
+
+    <!-- 정적 영역: 페이지 로드 시 한 번만 렌더링되며, Ajax 요청에 영향을 받지 않는다 -->
+    <div class="static-area">
+        <h3>이 영역은 변하지 않습니다 (정적 영역)</h3>
+        <p>페이지 로드 시각: <strong id="pageLoadTime"></strong></p>
+        <p>버튼 클릭 횟수: <strong id="clickCount">0</strong>회</p>
+        <p>Ajax 요청을 보내도 이 영역의 시각은 그대로입니다. (페이지가 새로고침되지 않음)</p>
+    </div>
+
+    <div>
+        <button id="loadBtn">서버에서 데이터 불러오기</button>
+        <button id="clearBtn">데이터 지우기</button>
+    </div>
+
+    <!-- 동적 영역: Ajax 응답에 따라 이 부분만 업데이트된다 -->
+    <div class="dynamic-area">
+        <h3>이 영역만 업데이트됩니다 (동적 영역)</h3>
+        <div id="status">버튼을 클릭하면 서버에서 데이터를 가져옵니다.</div>
+        <table id="userTable" style="display:none;">
+            <thead><tr><th>ID</th><th>이름</th><th>이메일</th><th>등록일</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <script>
-        // --- Ajax (Asynchronous JavaScript and XML) ---
-        // 페이지 전체를 새로고침하지 않고, 서버에 비동기 요청을 보내 데이터만 받아온다.
-        // XMLHttpRequest는 브라우저 내장 Ajax 객체이다 (fetch API의 전신).
-        document.getElementById('loadBtn').addEventListener('click', function () {
-            var xhr = new XMLHttpRequest();     // 1. Ajax 객체 생성
-            xhr.open('GET', '/api.php');         // 2. 요청 방식(GET)과 URL 설정
-            xhr.onload = function () {           // 3. 응답 완료 시 실행할 콜백 등록
-                if (xhr.status === 200) {
-                    var users = JSON.parse(xhr.responseText);  // JSON 문자열 → JS 객체 변환
-                    var tbody = document.querySelector('#userTable tbody');
+        // --- Ajax (Asynchronous JavaScript and XML) 핵심 개념 ---
+        // 페이지 전체를 새로고침하지 않고, 특정 영역의 데이터만 서버에서 받아와 갱신한다.
+        // 이를 "부분 업데이트(Partial Update)"라고 한다.
+
+        // 페이지 로드 시각 기록 — Ajax 요청 후에도 이 값은 변하지 않음을 확인
+        document.getElementById('pageLoadTime').textContent = new Date().toLocaleTimeString();
+
+        let clickCount = 0;  // let: 값이 변하는 변수
+
+        // "데이터 불러오기" 버튼 — 동적 영역만 업데이트
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            clickCount++;
+            document.getElementById('clickCount').textContent = clickCount;
+            document.getElementById('status').textContent = '서버에 요청 중...';
+
+            // fetch API: 비동기 HTTP 요청을 보내고, Promise로 응답을 처리
+            fetch('/api.php')
+                .then((res) => res.json())
+                .then((users) => {
+                    const tbody = document.querySelector('#userTable tbody');
                     tbody.innerHTML = '';
-                    // DOM 조작으로 테이블 행을 동적 생성
-                    users.forEach(function (user) {
-                        var tr = document.createElement('tr');
+                    users.forEach((user) => {
+                        const tr = document.createElement('tr');
                         tr.innerHTML =
-                            '<td>' + user.id + '</td>' +
-                            '<td>' + user.name + '</td>' +
-                            '<td>' + user.email + '</td>' +
-                            '<td>' + user.created_at + '</td>';
+                            `<td>${user.id}</td>` +
+                            `<td>${user.name}</td>` +
+                            `<td>${user.email}</td>` +
+                            `<td>${user.created_at}</td>`;
                         tbody.appendChild(tr);
                     });
+
                     document.getElementById('userTable').style.display = 'table';
-                }
-            };
-            xhr.send();                          // 4. 실제 요청 전송
+                    document.getElementById('status').textContent =
+                        `${users.length}건 로드 완료 (${new Date().toLocaleTimeString()})`;
+
+                    // 동적 영역에 시각적 강조 효과 — 어디가 업데이트되었는지 보여준다
+                    const dynamicArea = document.querySelector('.dynamic-area');
+                    dynamicArea.classList.remove('flash');
+                    void dynamicArea.offsetWidth;  // reflow 트리거로 애니메이션 재시작
+                    dynamicArea.classList.add('flash');
+                });
+        });
+
+        // "데이터 지우기" 버튼 — 서버 요청 없이 DOM만 조작
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.querySelector('#userTable tbody').innerHTML = '';
+            document.getElementById('userTable').style.display = 'none';
+            document.getElementById('status').textContent = '데이터를 지웠습니다. 다시 불러오기를 눌러보세요.';
         });
     </script>
 </body>

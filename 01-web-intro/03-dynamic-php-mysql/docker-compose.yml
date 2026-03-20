@@ -29,6 +29,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root          # root 계정 비밀번호 (학습용)
       MYSQL_DATABASE: example            # 컨테이너 시작 시 자동 생성할 DB 이름
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci  # 한글 지원
     ports:
       - "3306:3306"                      # 호스트에서 DB 직접 접속 가능 (디버깅용)
     volumes:
